@@ -1,0 +1,29 @@
+# ══════════════════════════════════════════════════════════════════
+# requirements.txt — Agente IA Auditoría ISO 27001
+# Python >= 3.10 requerido
+# ══════════════════════════════════════════════════════════════════
+
+# ── CLI y UI ──────────────────────────────────────────────────────
+typer[all]>=0.12.0          # CLI con soporte Rich incluido
+rich>=13.7.0                # Salida de consola enriquecida
+
+# ── Variables de entorno ──────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── HTTP (Ollama backend) ─────────────────────────────────────────
+requests>=2.31.0
+httpx>=0.27.0               # Alternativa async si se necesita
+
+# ── Gemini backend ────────────────────────────────────────────────
+google-generativeai>=0.7.0
+
+# ── Lectura de PDFs ───────────────────────────────────────────────
+PyMuPDF>=1.24.0             # pip instala como 'fitz' (más rápido)
+pdfplumber>=0.11.0          # Fallback para PDFs con tablas
+
+# ── Generación de PDF ─────────────────────────────────────────────
+reportlab>=4.2.0            # Generador PDF principal
+fpdf2>=2.7.9                # Fallback ligero
+
+# ── Tipado y utilidades ───────────────────────────────────────────
+typing-extensions>=4.11.0
