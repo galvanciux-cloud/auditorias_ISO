@@ -26,6 +26,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
+from rich.text import Text
 from rich import print as rprint
 
 from config import Config, setup_logging
@@ -47,6 +48,7 @@ app = typer.Typer(
     help="🔒 Agente IA para Auditorías de Cumplimiento ISO 27001:2022",
     add_completion=False,
     rich_markup_mode="rich",
+    no_args_is_help=False,  # Cambiado para mostrar menú personalizado
 )
 console = Console()
 
@@ -61,6 +63,177 @@ BANNER = """
 def _print_banner() -> None:
     console.print(BANNER)
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Menú de comandos
+# ──────────────────────────────────────────────────────────────────────────────
+
+def _show_menu() -> None:
+    """Muestra el menú principal con todos los comandos disponibles."""
+    _print_banner()
+
+    # Tabla principal de comandos
+    table = Table(
+        title="📋 MENÚ DE COMANDOS",
+        show_header=True,
+        header_style="bold cyan",
+        border_style="blue",
+        padding=(0, 1),
+    )
+    table.add_column("Nº", style="bold white", width=4, justify="center")
+    table.add_column("Comando", style="bold green", width=28)
+    table.add_column("Descripción", style="white", width=52)
+    table.add_column("Ejemplo", style="dim", width=36)
+
+    commands = [
+        ("1", "start", "Iniciar/reanudar auditoría", "python main.py start"),
+        ("2", "start -c A.5.1,A.8.1", "Auditar controles específicos", "python main.py start -c A.5.1"),
+        ("3", "status", "Ver progreso de auditoría", "python main.py status"),
+        ("4", "report", "Generar informes TXT/PDF", "python main.py report"),
+        ("5", "report -f pdf", "Generar solo informe PDF", "python main.py report -f pdf"),
+        ("6", "load-doc <archivo>", "Cargar documento ISO", "python main.py load-doc iso.pdf"),
+        ("7", "list-controls", "Listar controles Anexo A", "python main.py list-controls"),
+        ("8", "reset", "Borrar estado y empezar de cero", "python main.py reset -y"),
+        ("9", "help", "Mostrar ayuda detallada", "python main.py --help"),
+        ("0", "exit / Ctrl+C", "Salir del programa", ""),
+    ]
+
+    for num, cmd, desc, example in commands:
+        table.add_row(num, cmd, desc, example)
+
+    console.print()
+    console.print(table)
+
+    # Panel de información rápida
+    info_panel = Panel(
+        "[bold]Opciones rápidas:[/bold]\n"
+        "• [cyan]--controls, -c[/cyan]  → Controles específicos (ej: A.5.1,A.5.2,A.8.1)\n"
+        "• [cyan]--format, -f[/cyan]    → Formato informe: txt, pdf, all\n"
+        "• [cyan]--output, -o[/cyan]    → Ruta personalizada de salida\n"
+        "• [cyan]--skip-done[/cyan]     → Omitir controles ya evaluados\n"
+        "• [cyan]--no-skip-done[/cyan]  → Re-evaluar todos los controles\n"
+        "• [cyan]--copy/--no-copy[/cyan]→ Copiar doc al directorio knowledge/\n"
+        "• [cyan]--yes, -y[/cyan]       → Confirmar sin preguntar",
+        title="ℹ️  Opciones Adicionales",
+        border_style="dim",
+        width=90,
+    )
+    console.print(info_panel)
+
+    # Atajos de teclado
+    console.print(
+        "\n[dim]💡 Tip: Puedes usar las teclas [bold]↑↓[/bold] para navegar el historial de comandos[/dim]\n"
+    )
+
+
+def _interactive_menu() -> None:
+    """Menú interactivo donde el usuario selecciona una opción."""
+    _show_menu()
+
+    while True:
+        try:
+            choice = typer.prompt(
+                "\n[bold cyan]Selecciona una opción[/bold cyan] (número o comando, 0 para salir)",
+                default="",
+            ).strip().lower()
+
+            if choice in ("0", "exit", "salir", "q", "quit"):
+                console.print("\n[yellow]👋 ¡Hasta luego![/yellow]\n")
+                raise typer.Exit()
+
+            # Mapeo de opciones
+            menu_actions = {
+                "1": "start",
+                "2": "start --controls",
+                "3": "status",
+                "4": "report",
+                "5": "report --format pdf",
+                "6": "load-doc",
+                "7": "list-controls",
+                "8": "reset",
+                "9": "--help",
+            }
+
+            if choice in menu_actions:
+                action = menu_actions[choice]
+
+                # Casos especiales que requieren input adicional
+                if action == "start --controls":
+                    controls = typer.prompt("  Ingresa controles separados por coma", default="A.5.1,A.5.2")
+                    sys.argv = ["main.py", "start", "--controls", controls]
+                    start(controls=controls)
+                elif action == "load-doc":
+                    file_path = typer.prompt("  Ruta al documento ISO")
+                    if file_path:
+                        sys.argv = ["main.py", "load-doc", file_path]
+                        load_doc(Path(file_path))
+                    else:
+                        console.print("[yellow]⚠️  Debes especificar una ruta[/yellow]")
+                        continue
+                elif action == "reset":
+                    sys.argv = ["main.py", "reset", "--yes"]
+                    reset(confirm=True)
+                else:
+                    sys.argv = ["main.py"] + action.split()
+                    if action == "--help":
+                        ctx = typer.Context(app)
+                        typer.echo(app.get_help(ctx))
+                    else:
+                        app()
+
+                # Volver a mostrar menú después de ejecutar
+                console.print("\n" + "─" * 70 + "\n")
+                _show_menu()
+
+            # Si el usuario escribe directamente un comando
+            elif choice in ("start", "status", "report", "list-controls"):
+                sys.argv = ["main.py", choice]
+                app()
+                console.print("\n" + "─" * 70 + "\n")
+                _show_menu()
+
+            elif choice == "help":
+                ctx = typer.Context(app)
+                typer.echo(app.get_help(ctx))
+
+            elif choice == "menu":
+                _show_menu()
+
+            else:
+                console.print(f"[red]❌ Opción no reconocida: '{choice}'[/red]")
+                console.print("[dim]   Escribe un número del menú o un comando válido[/dim]")
+
+        except KeyboardInterrupt:
+            console.print("\n\n[yellow]👋 ¡Hasta luego![/yellow]\n")
+            raise typer.Exit()
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Callback: se ejecuta cuando no se pasa ningún comando
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    menu: bool = typer.Option(
+        False,
+        "--menu", "-m",
+        help="Mostrar el menú interactivo de comandos",
+    ),
+) -> None:
+    """
+    🔒 [bold]Agente IA para Auditorías de Cumplimiento ISO 27001:2022[/bold]
+
+    Ejecuta sin argumentos para ver el menú interactivo, o usa un comando directamente.
+    """
+    # Si se pasa --menu o no hay comando, mostrar menú
+    if menu or ctx.invoked_subcommand is None:
+        _interactive_menu()
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Inicialización de componentes
+# ──────────────────────────────────────────────────────────────────────────────
 
 def _init_components() -> tuple[LLMRouter, KnowledgeBase, MemoryManager]:
     """Inicializa y valida todos los componentes del sistema."""
@@ -399,7 +572,7 @@ def reset(
         console.print("[dim]No había estado previo que borrar.[/dim]")
 
 
-@app.command()
+@app.command("list-controls")
 def list_controls() -> None:
     """
     📋 [bold]Listar todos los controles del Anexo A de ISO 27001:2022[/bold].
