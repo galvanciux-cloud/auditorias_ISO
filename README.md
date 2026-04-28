@@ -23,7 +23,7 @@ iso27001_agent/
 ├── main.py                  # CLI principal (Typer) — punto de entrada
 ├── config.py                # Variables de entorno y configuración central
 ├── llm_router.py            # Abstracción multi-modelo (Gemini / Ollama)
-├── knowledge_base.py        # Carga y fragmentación de documentos ISO
+├── knowledge_base.py        # Carga y fragmentación de documentos ISO (Aqui irán tus documentos y normativas ISO27001)
 ├── memory_manager.py        # Persistencia del estado en estado_auditoria.md
 ├── audit_engine.py          # Motor de auditoría: prompts, evaluación, flujo
 ├── report_generator.py      # Generación de informes TXT y PDF
@@ -82,11 +82,11 @@ cp .env.example .env
 nano .env   # o: code .env / vim .env
 ```
 
-#### Opción A — Usar Ollama (local, gratuito)
+#### Opción A — Usar Ollama (local, gratuito y privacidad total)
 
 ```bash
 # Asegúrate de tener Ollama instalado: https://ollama.ai
-ollama pull llama3          # o: mistral, llama3.1, gemma2, etc.
+ollama pull deepseek-r1:latest          # o: deepseek-1,mistral, llama3.1, gemma2, etc.
 ollama serve                # Inicia el servidor (si no corre ya como servicio)
 ```
 
@@ -97,7 +97,7 @@ OLLAMA_MODEL=llama3
 OLLAMA_BASE_URL=http://localhost:11434
 ```
 
-#### Opción B — Usar Google Gemini (API en la nube)
+#### Opción B — Usar Google Gemini (API en la nube) modelos cloud 
 
 Obtén tu API Key en: https://aistudio.google.com/app/apikey
 
