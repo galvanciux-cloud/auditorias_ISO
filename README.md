@@ -3,6 +3,14 @@
 Asistente de auditoría interactivo por consola que guía el proceso de evaluación
 de cumplimiento de la norma ISO 27001:2022 usando IA (Gemini u Ollama).
 
+
+<img width="1286" height="774" alt="iso1" src="https://github.com/user-attachments/assets/03e2e096-40d9-4bfc-9693-d112b1266789" />
+<img width="1283" height="483" alt="2iso" src="https://github.com/user-attachments/assets/c154e1b7-58d6-4892-b4f7-05dce0781598" />
+<img width="1314" height="766" alt="iso3" src="https://github.com/user-attachments/assets/cb9c33fa-f13f-4985-84a1-1153c02d6e09" />
+<img width="1283" height="483" alt="2iso" src="https://github.com/user-attachments/assets/c154e1b7-58d6-4892-b4f7-05dce0781598" />
+
+
+
 ---
 
 ## 📁 Árbol de Archivos
