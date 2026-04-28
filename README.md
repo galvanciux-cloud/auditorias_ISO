@@ -8,6 +8,8 @@ de cumplimiento de la norma ISO 27001:2022 usando IA (Gemini u Ollama).
 <img width="1283" height="483" alt="2iso" src="https://github.com/user-attachments/assets/c154e1b7-58d6-4892-b4f7-05dce0781598" />
 <img width="1314" height="766" alt="iso3" src="https://github.com/user-attachments/assets/cb9c33fa-f13f-4985-84a1-1153c02d6e09" />
 <img width="1283" height="483" alt="2iso" src="https://github.com/user-attachments/assets/c154e1b7-58d6-4892-b4f7-05dce0781598" />
+<img width="950" height="781" alt="iso5" src="https://github.com/user-attachments/assets/e6472798-f930-4636-90a5-a5e67e3b4db6" />
+
 
 
 
